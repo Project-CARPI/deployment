@@ -1,0 +1,25 @@
+name: carpi-course-planner-deployment
+
+include:
+  # Include the API backend from GitHub
+  - git:
+      url: https://github.com/your-username/api.git
+      branch: main
+
+  # Include the frontend from GitHub
+  - git:
+      url: https://github.com/your-username/site.git
+      branch: main
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - api
+      - site
+      - db
