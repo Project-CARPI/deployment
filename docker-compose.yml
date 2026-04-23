@@ -1,12 +1,7 @@
 name: carpi-course-planner-deployment
 
-# Reference remote git repositories directly by URL with #branch
-include:
-  - https://github.com/Project-CARPI/api.git#deployment-setup
-  - https://github.com/Project-CARPI/site.git#main-preview
-  - https://github.com/Project-CARPI/sis-scraper.git#deployment-setup
-
 services:
+  # --- NGINX ---
   nginx:
     image: nginx:alpine
     ports:
@@ -19,3 +14,65 @@ services:
       - db
       - api
       - sis_scraper
+
+  # --- Database ---
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_SCHEMA}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-u",
+          "${DB_USERNAME}",
+          "--password=${DB_PASSWORD}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # --- API (Fetched from GHCR) ---
+  api:
+    image: ghcr.io/project-carpi/api:latest
+    restart: always
+    environment:
+      DB_DIALECT: ${DB_DIALECT}
+      DB_API: ${DB_API}
+      DB_HOSTNAME: db
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SCHEMA: ${DB_SCHEMA}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # --- SIS Scraper (Fetched from GHCR) ---
+  sis_scraper:
+    image: ghcr.io/project-carpi/sis-scraper:latest
+    restart: always
+    environment:
+      SIS_URL: ${SIS_URL}
+      SIS_USERNAME: ${SIS_USERNAME}
+      SIS_PASSWORD: ${SIS_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # --- Web App (Fetched from GHCR) ---
+  web:
+    image: ghcr.io/project-carpi/site:latest
+    restart: always
+
+volumes:
+  mysql_data:
