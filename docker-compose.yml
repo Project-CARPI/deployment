@@ -44,7 +44,7 @@ services:
 
   # --- API (Fetched from GHCR) ---
   api:
-    image: ghcr.io/project-carpi/api:latest
+    image: ghcr.io/project-carpi/carpi-api:latest
     restart: always
     environment:
       DB_DIALECT: ${DB_DIALECT}
