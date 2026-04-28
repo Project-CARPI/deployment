@@ -1,5 +1,9 @@
 name: carpi-course-planner-deployment
 
+env:
+  # Hardcode this variable for API and SIS Scraper services
+  DB_HOSTNAME: db:3306
+
 services:
   # --- NGINX ---
   nginx:
@@ -50,8 +54,7 @@ services:
     environment:
       DB_DIALECT: ${DB_DIALECT}
       DB_API: ${DB_API}
-      # Hardcode the DB_HOSTNAME environment variable
-      DB_HOSTNAME: db:3306
+      DB_HOSTNAME: ${DB_HOSTNAME}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_SCHEMA: ${DB_SCHEMA}
@@ -74,7 +77,6 @@ services:
       SUBJECT_CODE_NAME_MAP_FILENAME: ${SUBJECT_CODE_NAME_MAP_FILENAME}
       DB_DIALECT: ${DB_DIALECT}
       DB_API: ${DB_API}
-      # Hardcode the DB_HOSTNAME environment variable
       DB_HOSTNAME: db:3306
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
